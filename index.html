@@ -783,8 +783,11 @@
   function getDomain(url) {
     try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
   }
-  function screenshotUrl(url, w = 1280, h = 800, fullPage = false) {
-    return `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&meta=false&embed=screenshot.url&waitForTimeout=1500&type=jpeg&overlay.browser=dark&viewport.width=${w}&viewport.height=${h}${fullPage ? '&screenshot.fullPage=true' : ''}`;
+  function screenshotUrl(url, w = 1280, h = 800) {
+    return `https://api.microlink.io?url=${encodeURIComponent(url)}&screenshot=true&meta=false&embed=screenshot.url&waitForTimeout=1500&type=jpeg&overlay.browser=dark&viewport.width=${w}&viewport.height=${h}`;
+  }
+  function fullPageScreenshotUrl(url, w = 1440) {
+    return `https://image.thum.io/get/fullpage/width/${w}/${url}`;
   }
   function faviconUrl(url) {
     return `https://www.google.com/s2/favicons?domain=${getDomain(url)}&sz=32`;
@@ -1113,7 +1116,7 @@
       wrap.innerHTML = `<div class="preview-modal-loading"><div class="spinner"></div>Generating full-page preview…</div>`;
 
       const img = new Image();
-      img.src = screenshotUrl(site.url, 1440, 900, true);
+      img.src = fullPageScreenshotUrl(site.url);
       img.style.cssText = 'width:100%;display:block';
       img.onload = () => { wrap.innerHTML = ''; wrap.appendChild(img); };
       img.onerror = () => {
