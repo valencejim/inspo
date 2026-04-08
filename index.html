@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inspo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0e;
+      --surface: #181818;
+      --surface2: #222222;
+      --border: #2a2a2a;
+      --border-hover: #404040;
+      --text: #f0f0f0;
+      --text-muted: #666;
+      --text-dim: #444;
+      --accent: #7c6fff;
+      --accent-hover: #9589ff;
+      --danger: #ff5c5c;
+      --card-w: 360px;
+      --card-preview-h: 220px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: rgba(14,14,14,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .logo span { color: var(--accent); }
+
+    /* ── Board tabs ── */
+    .boards-scroll {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .boards-scroll::-webkit-scrollbar { display: none; }
+
+    .board-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      border: 1px solid transparent;
+      background: none;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .board-tab:hover { color: var(--text); background: var(--surface); }
+
+    .board-tab.active {
+      color: var(--text);
+      background: var(--surface2);
+      border-color: var(--border);
+    }
+
+    .board-tab .tab-count {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .board-tab.active .tab-count { background: var(--border); color: var(--text-muted); }
+
+    .board-tab .tab-delete {
+      opacity: 0;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 14px;
+      line-height: 1;
+      padding: 0 0 0 2px;
+      transition: opacity 0.1s, color 0.1s;
+    }
+
+    .board-tab:hover .tab-delete { opacity: 1; }
+    .board-tab .tab-delete:hover { color: var(--danger); }
+
+    .btn-new-board {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      background: none;
+      border: 1px dashed var(--border);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-new-board:hover { color: var(--text); border-color: var(--border-hover); }
+
+    /* ── Add URL button ── */
+    .btn-add-url {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-add-url:hover { background: var(--accent-hover); }
+
+    /* ── Main ── */
+    .main {
+      padding: 80px 24px 48px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .empty-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .empty-state h2 {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 320px;
+      line-height: 1.6;
+    }
+
+    .btn-empty-add {
+      margin-top: 8px;
+      padding: 9px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-empty-add:hover { background: var(--accent-hover); }
+
+    /* ── Grid ── */
+    .grid {
+      columns: var(--card-w) auto;
+      gap: 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      break-inside: avoid;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    /* ── Preview area ── */
+    .card-preview {
+      width: 100%;
+      height: var(--card-preview-h);
+      overflow: hidden;
+      position: relative;
+      background: var(--surface2);
+    }
+
+    .card-preview iframe {
+      width: 1440px;
+      height: 900px;
+      transform: scale(0.25);
+      transform-origin: top left;
+      pointer-events: none;
+      border: none;
+    }
+
+    .card-preview .preview-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+    }
+
+    /* Fallback for blocked iframes */
+    .card-preview .preview-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--surface2);
+      z-index: 1;
+    }
+
+    .preview-fallback .fallback-globe {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+
+    .preview-fallback .fallback-url {
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-fallback .fallback-note {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* ── Card footer ── */
+    .card-footer {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-favicon {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-url {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .card:hover .card-actions { opacity: 1; }
+
+    .card-action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .card-action-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border-hover); }
+    .card-action-btn.delete:hover { background: rgba(255,92,92,0.1); color: var(--danger); border-color: rgba(255,92,92,0.3); }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      transform: translateY(8px);
+      transition: transform 0.2s;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+
+    .modal-backdrop.visible .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .modal-field {
+      margin-bottom: 14px;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .modal-field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .modal-field input:focus { border-color: var(--accent); }
+    .modal-field input::placeholder { color: var(--text-dim); }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      padding: 8px 16px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .btn-cancel:hover { border-color: var(--border-hover); color: var(--text); }
+
+    .btn-submit {
+      padding: 8px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .btn-submit:hover { background: var(--accent-hover); }
+
+    /* ── Full preview modal ── */
+    .preview-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .preview-modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .preview-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .preview-modal-url {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .preview-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .preview-modal-close:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .btn-open-external {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      text-decoration: none;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .btn-open-external:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .preview-modal-frame {
+      flex: 1;
+      border: none;
+      background: #fff;
+    }
+
+    .preview-modal-blocked {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .preview-modal-blocked p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .btn-visit {
+      padding: 10px 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .btn-visit:hover { background: var(--accent-hover); }
+
+    /* ── Board name input inline ── */
+    .board-tab input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      width: 100px;
+    }
+
+    /* loading shimmer */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+
+    .preview-loading {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--surface2) 25%, var(--surface) 50%, var(--surface2) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite;
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="logo">Ins<span>p</span>o</div>
+
+  <div class="boards-scroll" id="boardsScroll"></div>
+
+  <button class="btn-new-board" onclick="newBoard()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    New board
+  </button>
+
+  <button class="btn-add-url" onclick="openAddModal()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Add site
+  </button>
+</header>
+
+<!-- Main -->
+<main class="main" id="main"></main>
+
+<!-- Add URL Modal -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Add a site</div>
+    <div class="modal-field">
+      <label>URL</label>
+      <input type="url" id="urlInput" placeholder="https://example.com" autocomplete="off">
+    </div>
+    <div class="modal-field">
+      <label>Title <span style="color:var(--text-dim);font-weight:400">(optional — auto-detected)</span></label>
+      <input type="text" id="titleInput" placeholder="Leave blank to auto-detect">
+    </div>
+    <div class="modal-field">
+      <label>Notes <span style="color:var(--text-dim);font-weight:400">(optional)</span></label>
+      <input type="text" id="notesInput" placeholder="What do you like about this?">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-submit" onclick="addSite()">Add site</button>
+    </div>
+  </div>
+</div>
+
+<!-- Full Preview Modal -->
+<div class="preview-modal-backdrop" id="previewModal">
+  <div class="preview-modal-header">
+    <img id="previewFavicon" width="16" height="16" style="border-radius:3px;flex-shrink:0" onerror="this.style.display='none'">
+    <span class="preview-modal-url" id="previewUrl"></span>
+    <a class="btn-open-external" id="previewExternal" target="_blank" rel="noopener">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Open
+    </a>
+    <button class="preview-modal-close" onclick="closePreviewModal()">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <iframe class="preview-modal-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+</div>
+
+<script>
+  // ── State ──
+  let state = JSON.parse(localStorage.getItem('inspo') || 'null') || {
+    boards: [{ id: uid(), name: 'Inspiration', sites: [] }],
+    activeBoard: null
+  };
+
+  if (!state.activeBoard) state.activeBoard = state.boards[0].id;
+
+  function uid() { return Math.random().toString(36).slice(2, 10); }
+
+  function save() { localStorage.setItem('inspo', JSON.stringify(state)); }
+
+  function activeBoard() { return state.boards.find(b => b.id === state.activeBoard); }
+
+  // ── Render boards ──
+  function renderBoards() {
+    const el = document.getElementById('boardsScroll');
+    el.innerHTML = state.boards.map(b => `
+      <button class="board-tab ${b.id === state.activeBoard ? 'active' : ''}" onclick="switchBoard('${b.id}')">
+        <span class="tab-name" ondblclick="renameBoard(event,'${b.id}')">${b.name}</span>
+        <span class="tab-count">${b.sites.length}</span>
+        ${state.boards.length > 1 ? `<span class="tab-delete" onclick="deleteBoard(event,'${b.id}')">×</span>` : ''}
+      </button>
+    `).join('');
+  }
+
+  // ── Render grid ──
+  function renderGrid() {
+    const board = activeBoard();
+    const main = document.getElementById('main');
+
+    if (!board || board.sites.length === 0) {
+      main.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="#444"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#333"/></svg>
+          </div>
+          <h2>No sites yet</h2>
+          <p>Add websites you find inspiring to build your collection.</p>
+          <button class="btn-empty-add" onclick="openAddModal()">Add your first site</button>
+        </div>`;
+      return;
+    }
+
+    main.innerHTML = `<div class="grid" id="grid">${board.sites.map(renderCard).join('')}</div>`;
+
+    // Load iframes after render
+    board.sites.forEach(site => loadPreview(site));
+  }
+
+  function renderCard(site) {
+    const domain = getDomain(site.url);
+    const favicon = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+    return `
+      <div class="card" id="card-${site.id}" onclick="openPreview('${site.id}')">
+        <div class="card-preview" id="preview-${site.id}">
+          <div class="preview-loading" id="loading-${site.id}"></div>
+          <div class="preview-overlay"></div>
+        </div>
+        <div class="card-footer">
+          <img class="card-favicon" src="${favicon}" alt="" onerror="this.style.display='none'">
+          <div class="card-info">
+            <div class="card-title">${site.title || domain}</div>
+            <div class="card-url">${domain}</div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <button class="card-action-btn" title="Open site" onclick="window.open('${site.url}','_blank')">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="card-action-btn delete" title="Remove" onclick="removeSite('${site.id}')">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>
+        ${site.notes ? `<div style="padding:0 14px 12px;font-size:12px;color:var(--text-muted);line-height:1.5">${site.notes}</div>` : ''}
+      </div>`;
+  }
+
+  function loadPreview(site) {
+    const container = document.getElementById(`preview-${site.id}`);
+    const loading = document.getElementById(`loading-${site.id}`);
+    if (!container) return;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = site.url;
+    iframe.sandbox = 'allow-scripts allow-same-origin';
+    iframe.style.cssText = 'width:1440px;height:900px;transform:scale(0.25);transform-origin:top left;pointer-events:none;border:none;';
+
+    iframe.onload = () => {
+      if (loading) loading.remove();
+      // Check if iframe actually loaded content (blocked sites show empty)
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc || doc.body.innerHTML === '') showFallback(container, site, loading);
+      } catch(e) {
+        // Cross-origin — assume it loaded fine visually
+        if (loading) loading.style.display = 'none';
+      }
+    };
+
+    iframe.onerror = () => showFallback(container, site, loading);
+
+    // Timeout fallback — if no load event after 6s, show fallback
+    setTimeout(() => {
+      if (document.getElementById(`loading-${site.id}`)) {
+        showFallback(container, site, loading);
+      }
+    }, 6000);
+
+    container.insertBefore(iframe, container.querySelector('.preview-overlay'));
+  }
+
+  function showFallback(container, site, loading) {
+    if (loading) loading.remove();
+    const existing = container.querySelector('iframe');
+    if (existing) existing.remove();
+    const domain = getDomain(site.url);
+    const fallback = document.createElement('div');
+    fallback.className = 'preview-fallback';
+    fallback.innerHTML = `
+      <div class="fallback-globe">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#555" stroke-width="1.3"/><path d="M10 2c0 0-3 3-3 8s3 8 3 8M10 2c0 0 3 3 3 8s-3 8-3 8M2 10h16" stroke="#555" stroke-width="1.3"/></svg>
+      </div>
+      <div class="fallback-url">${domain}</div>
+      <div class="fallback-note">Preview blocked by site</div>`;
+    container.insertBefore(fallback, container.querySelector('.preview-overlay'));
+  }
+
+  // ── Actions ──
+  function switchBoard(id) {
+    state.activeBoard = id;
+    save();
+    renderBoards();
+    renderGrid();
+  }
+
+  function newBoard() {
+    const board = { id: uid(), name: 'New board', sites: [] };
+    state.boards.push(board);
+    state.activeBoard = board.id;
+    save();
+    renderBoards();
+    renderGrid();
+    // Auto-focus the new tab name
+    setTimeout(() => {
+      const tabs = document.querySelectorAll('.board-tab');
+      const last = tabs[tabs.length - 1];
+      if (last) {
+        const nameEl = last.querySelector('.tab-name');
+        if (nameEl) startRenaming(nameEl, board.id);
+      }
+    }, 50);
+  }
+
+  function renameBoard(e, id) {
+    e.stopPropagation();
+    startRenaming(e.target, id);
+  }
+
+  function startRenaming(el, id) {
+    const current = el.textContent;
+    const input = document.createElement('input');
+    input.value = current;
+    input.style.cssText = 'background:none;border:none;outline:none;color:var(--text);font-size:13px;font-family:Inter,sans-serif;width:90px';
+    el.replaceWith(input);
+    input.focus();
+    input.select();
+    const finish = () => {
+      const name = input.value.trim() || current;
+      const board = state.boards.find(b => b.id === id);
+      if (board) board.name = name;
+      save();
+      renderBoards();
+    };
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = current; input.blur(); } });
+  }
+
+  function deleteBoard(e, id) {
+    e.stopPropagation();
+    if (!confirm('Delete this board and all its sites?')) return;
+    state.boards = state.boards.filter(b => b.id !== id);
+    if (state.activeBoard === id) state.activeBoard = state.boards[0].id;
+    save();
+    renderBoards();
+    renderGrid();
+  }
+
+  // ── Add site modal ──
+  function openAddModal() {
+    document.getElementById('addModal').classList.add('visible');
+    setTimeout(() => document.getElementById('urlInput').focus(), 100);
+  }
+
+  function closeAddModal() {
+    document.getElementById('addModal').classList.remove('visible');
+    document.getElementById('urlInput').value = '';
+    document.getElementById('titleInput').value = '';
+    document.getElementById('notesInput').value = '';
+  }
+
+  async function addSite() {
+    let url = document.getElementById('urlInput').value.trim();
+    const title = document.getElementById('titleInput').value.trim();
+    const notes = document.getElementById('notesInput').value.trim();
+
+    if (!url) return;
+    if (!/^https?:\/\//.test(url)) url = 'https://' + url;
+
+    const site = { id: uid(), url, title: title || '', notes, addedAt: Date.now() };
+    activeBoard().sites.unshift(site);
+    save();
+    closeAddModal();
+    renderBoards();
+    renderGrid();
+  }
+
+  function removeSite(id) {
+    const board = activeBoard();
+    board.sites = board.sites.filter(s => s.id !== id);
+    save();
+    renderBoards();
+    renderGrid();
+  }
+
+  // ── Full preview ──
+  function openPreview(id) {
+    const board = activeBoard();
+    const site = board.sites.find(s => s.id === id);
+    if (!site) return;
+
+    const backdrop = document.getElementById('previewModal');
+    document.getElementById('previewUrl').textContent = site.url;
+    document.getElementById('previewExternal').href = site.url;
+    document.getElementById('previewFavicon').src = `https://www.google.com/s2/favicons?domain=${getDomain(site.url)}&sz=32`;
+
+    const frame = document.getElementById('previewFrame');
+    frame.src = site.url;
+
+    backdrop.classList.add('visible');
+  }
+
+  function closePreviewModal() {
+    document.getElementById('previewModal').classList.remove('visible');
+    document.getElementById('previewFrame').src = '';
+  }
+
+  // ── Keyboard shortcuts ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closePreviewModal();
+      closeAddModal();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      openAddModal();
+    }
+  });
+
+  // ── Close modals on backdrop click ──
+  document.getElementById('addModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('addModal')) closeAddModal();
+  });
+
+  document.getElementById('previewModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('previewModal')) closePreviewModal();
+  });
+
+  // ── Enter key in URL modal ──
+  document.getElementById('urlInput').addEventListener('keydown', e => { if (e.key === 'Enter') addSite(); });
+  document.getElementById('titleInput').addEventListener('keydown', e => { if (e.key === 'Enter') addSite(); });
+  document.getElementById('notesInput').addEventListener('keydown', e => { if (e.key === 'Enter') addSite(); });
+
+  // ── Helpers ──
+  function getDomain(url) {
+    try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
+  }
+
+  // ── Init ──
+  renderBoards();
+  renderGrid();
+</script>
+</body>
+</html>
