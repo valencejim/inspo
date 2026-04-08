@@ -789,9 +789,6 @@
   function fullPageScreenshotUrl(url, w = 1440) {
     return `https://image.thum.io/get/fullpage/width/${w}/${url}`;
   }
-  function faviconUrl(url) {
-    return `https://www.google.com/s2/favicons?domain=${getDomain(url)}&sz=32`;
-  }
 
   // ── State ──
   let state = JSON.parse(localStorage.getItem('inspo-v2') || 'null') || {
@@ -845,7 +842,7 @@
             onerror="showCardFallback('${site.id}','${domain}')">
         </div>
         <div class="card-footer">
-          <img class="card-favicon" src="${faviconUrl(site.url)}" alt="" onerror="this.style.display='none'">
+          <svg class="image-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="white" stroke-width="1.2"/><path d="M8 1.5c0 0-3 2.5-3 6.5s3 6.5 3 6.5M8 1.5c0 0 3 2.5 3 6.5s-3 6.5-3 6.5M1.5 8h13" stroke="white" stroke-width="1.1"/></svg>
           <div class="card-info">
             <div class="card-title">${site.title || domain}</div>
             <div class="card-domain">${domain}</div>
@@ -870,7 +867,7 @@
           <img class="screenshot" src="${site.imageData}" alt="${site.title || 'Uploaded image'}">
         </div>
         <div class="card-footer">
-          <svg class="image-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="currentColor" stroke-width="1.2"/><circle cx="5.5" cy="6" r="1.5" stroke="currentColor" stroke-width="1"/><path d="M1.5 12l3-3.5 2.5 2.5 2-2L14.5 12" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg class="image-icon" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="white" stroke-width="1.2"/><circle cx="5.5" cy="6" r="1.5" stroke="white" stroke-width="1"/><path d="M1.5 12l3-3.5 2.5 2.5 2-2L14.5 12" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <div class="card-info">
             <div class="card-title">${site.title || 'Untitled image'}</div>
             <div class="card-domain">Uploaded image</div>
